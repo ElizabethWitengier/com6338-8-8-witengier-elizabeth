@@ -15,7 +15,7 @@ form.onsubmit = function(e) {
   fetch(fetchURL)
   .then(function(res) {
     if (res.status !== 200) {
-      throw new Error ("Location not found")
+      throw new Error("Location Not Found")
     }
     return res.json()
   })
@@ -55,8 +55,17 @@ form.onsubmit = function(e) {
     weatherSection.appendChild(feelsLike)
 
     var lastUpdated = document.createElement('p')
+    var date = new Date(/* milliseconds go here */)
+    var timeString = date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit'
+    lastUpdated.textContent = 'Last updated:' + timeString
+    weatherSection.appendChild(lastUpdated)
   }
+}
   
 function convertToF(kelvins) {
   return Math.round(((kelvins-273.15)*1.8)+32)
 }
+
+
