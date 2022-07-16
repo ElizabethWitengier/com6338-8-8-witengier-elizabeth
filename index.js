@@ -28,13 +28,13 @@ function searchWeather(location) {
 }
 
 function showWeather(data) {  
-  if(data.cod === '404' || data.cod === '400'){
+  if(data.cod !== 200){
     sectionWeather.innerHTML = '<p>Location Not Found</p>';  
   } else {
   if(data.cod === 200){
     const { coord: {lat, lon}, main: { temp, feels_like  }, name, sys: {country}, weather: {[0]: {description, icon}}} = data;
     const tempFahrenheit = kelvinFahrenheit(temp);
-    const feelLike = kelvinFahrenheit(feels_like);
+    const feelsLike = kelvinFahrenheit(feels_like);
     var date = new Date();
     var timeString = date.toLocaleTimeString('en-US' , {
       hour: 'numeric',
@@ -46,8 +46,8 @@ function showWeather(data) {
       <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="__BLANK">Click to view map</a>
       <img src="https://openweathermap.org/img/wn/${icon}@2x.png">
       <p style="text-transform: capitalize;">${description}</p><br>
-      <p>Current: ${temp} ° F</p>
-      <p>Feels like: ${feels_like} ° F</p><br>
+      <p>Current: ${tempFahrenheit} ° F</p>
+      <p>Feels like: ${feelsLike} ° F</p><br>
       <p>Last updated: ${timeString}</p>
       `;
     }
@@ -55,7 +55,7 @@ function showWeather(data) {
 }
 
 function kelvinFahrenheit(temp) {
-    return parseInt(temp - 273.15) * 9/5 + 32;
+    return Math.round((temp - 273.15) * 1.8) + 32
     console.log(data)
 }
 
