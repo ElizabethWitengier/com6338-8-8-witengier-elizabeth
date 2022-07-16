@@ -1,71 +1,61 @@
-var weatherURL = "https://api.openweathermap.org/data/2.5/weather"
-var queryString = "?units=imperial&appid=0a1fa303002be15765aacd2cd1522ee6" + userQuery
-var fetchURL = weatherURL + queryString
+var sectionWeather = document.getElementById('weather');
+var inputLocation = document.getElementById('weather-search');
+var buttonSubmit = document.querySelector('button[type="submit"]');
+
+inputLocation.setAttribute( "autocomplete", "off" ); 
+buttonSubmit.addEventListener('click', onSearch);
 
 
-var weatherSection = document.getElementById('weather')
-var form = document.querySelector('form')
-
-
-form.onsubmit = function(e) {
-  e.preventDefault()
-  var userQuery = this.search.value.trim()
-  if (!userQuery) return
-  form.search.value = ""
-  fetch(fetchURL)
-  .then(function(res) {
-    if (res.status !== 200) {
-      throw new Error("Location Not Found")
-    }
-    return res.json()
-  })
-  .then(renderWeather) 
-  .catch(function(err) {
-    weatherSection.innerHTML = err.message
-  })
+function onSearch(e) {
+  e.preventDefault();
+  inputLocation.setAttribute( "autocomplete", "off" ); 
+  const location = inputLocation.value; 
+  searchWeather(location);
+  inputLocation.value = '';    
 }
-    
-  function renderWeather(data) {
-    weatherSection.innerHTML = ""
-    var h2 = document.createElement('h2')
-    h2.textContent = data.city + ", " + data.city.country
-    weatherSection.appendChild(h2)
 
-    var map = document.createElement('a')
-    map.href = "tel:" + data.coord /* is coord correct? how am I using the long and lat?*/
-    map.textContent = "Click to view map"
-    weatherSection.appendChild(map)
+function searchWeather(location) { 
+  const apiKey = `a76b32bf5b491e65fd99110fed59d0ba`;
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}`;
 
-    var icon = document.createElement('img')
-    icon.src = /* dt and url or weather.icon??? */
-    weatherSection.appendChild(icon)
+  fetch(url)
+    .then (response => response.json())
+    .then (data => {
+      if(data !== null){
+      showWeather(data);
+      }
+    })      
+}
 
-    var description = document.createElement('p')
-    description.textContent = data.weather.description.toUpperCase()
-    weatherSection.appendChild(description)
-
-    weatherSection.appendChild(document.createElement('br'))
-
-    var currentTemp = document.createElement('p')
-    currentTemp.textContent = 'Current:' + convertToF(data.main.temp) + 'F'
-    weatherSection.appendChild(currentTemp)   
-
-    var feelsLike = document.createElement('p')
-    feelsLike.textContent = 'Feels like:' + convertToF(data.main.feels_like) + 'F'
-    weatherSection.appendChild(feelsLike)
-
-    var lastUpdated = document.createElement('p')
-    var date = new Date(/* milliseconds go here */)
-    var timeString = date.toLocaleTimeString('en-US', {
+function showWeather(data) {  
+  if(data.cod === '404' || data.cod === '400'){
+    sectionWeather.innerHTML = '<p>Location Not Found</p>';  
+  } else {
+  if(data.cod === 200){
+    const { coord: {lat, lon}, main: { temp, feels_like  }, name, sys: {country}, weather: {[0]: {description, icon}}} = data;
+    const tempFahrenheit = kelvinFahrenheit(temp);
+    const feelLike = kelvinFahrenheit(feels_like);
+    var date = new Date();
+    var timeString = date.toLocaleTimeString('en-US' , {
       hour: 'numeric',
-      minute: '2-digit'
-    lastUpdated.textContent = 'Last updated:' + timeString
-    weatherSection.appendChild(lastUpdated)
-  }
-}
-  
-function convertToF(kelvins) {
-  return Math.round(((kelvins-273.15)*1.8)+32)
+      minute:'2-digit'
+  });
+            
+      sectionWeather.innerHTML = `
+      <h2>${ name },  ${ country }</h2>
+      <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="__BLANK">Click to view map</a>
+      <img src="https://openweathermap.org/img/wn/${icon}@2x.png">
+      <p style="text-transform: capitalize;">${description}</p><br>
+      <p>Current: ${temp} ° F</p>
+      <p>Feels like: ${feels_like} ° F</p><br>
+      <p>Last updated: ${timeString}</p>
+      `;
+    }
+  }    
 }
 
+function kelvinFahrenheit(temp) {
+    return parseInt(temp - 273.15) * 9/5 + 32;
+    console.log(data)
+}
 
