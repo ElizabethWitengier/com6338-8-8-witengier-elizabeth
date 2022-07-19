@@ -23,15 +23,6 @@ form.onsubmit = function(e) {
   inputE1.value = ""
 }
 
-
-function onSearch(e) {
-  
-  userInput.setAttribute( "autocomplete", "off" ); 
-  const location = userInput.value; 
-  searchWeather(location);
-  userInput.value = '';    
-}
-
 //call the OpenWeather API and return an object of weather info
 function getWeather(query) {
   //default search to USA
